@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <mutex>
 
-#include "singleton-cpp/singleton.h"
+#include <singleton-cpp/singleton.h>
 
 SINGLETON_API void* GetSharedInstance(
     const std::type_index& typeIndex,

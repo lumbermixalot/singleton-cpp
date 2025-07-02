@@ -1,5 +1,5 @@
 #include "my_dll.h"
-#include "singleton-cpp/singleton.h"
+#include <singleton-cpp/singleton.h>
 
 MY_DLL_API void setValue() {
 

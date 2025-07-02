@@ -1,5 +1,5 @@
 #include "my_dll.h"
-#include "singleton-cpp/singleton.h"
+#include <singleton-cpp/singleton.h>
 
 
 class MyObject0 : public Singleton<IMyObject0>::Registrar {
