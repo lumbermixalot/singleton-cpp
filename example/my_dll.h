@@ -5,17 +5,20 @@
 #include "my_dll_api.h"
 #include <string>
 
-class MyObject0 {
+class IMyObject0 {
 public:
-    int a;
-    int b;
+    virtual ~IMyObject0() = default;
+    virtual void SetValues(int a, int b) = 0;
+    virtual int GetA() const = 0;
+    virtual int GetB() const = 0;
 };
 
-class MyObject1 {
+class IMyObject1 {
 public:
-    std::string c;
+    virtual ~IMyObject1() = default;
+    virtual void SetString(const std::string& str) = 0;
+    virtual const std::string& GetString() const = 0;
 };
-
 
 MY_DLL_API void setValue();
 

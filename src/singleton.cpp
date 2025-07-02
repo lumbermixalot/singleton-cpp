@@ -1,72 +1,38 @@
-#include "singleton-cpp/singleton.h"
 #include <typeinfo>
 #include <typeindex>
 #include <unordered_map>
+#include <mutex>
 
-namespace {
-struct SingleTonHolder {
-    void *object_;
-    std::shared_ptr<std::mutex> mutex_;
-};
-}
+#include "singleton-cpp/singleton.h"
 
-// Global mutex
-static std::mutex &getSingleTonMutex() {
-    // s_singleTonMutex is not 100% safety for multithread
-    // but if there's any singleton object used before thread, it's safe enough.
-    static std::mutex s_singleTonMutex;
-    return s_singleTonMutex;
-}
+SINGLETON_API void* GetSharedInstance(
+    const std::type_index& typeIndex,
+    bool overWrite, void* instancePtr)
+{
+    static std::mutex s_databaseMutex;
+    static std::unordered_map<std::type_index, void*> s_pointersDatabase;
 
-static SingleTonHolder *getSingleTonType(const std::type_index &typeIndex) {
-    static std::unordered_map<std::type_index, SingleTonHolder> s_singleObjects;
+    std::lock_guard<std::mutex> myLock(s_databaseMutex);
 
-    // Check the old value
-    std::unordered_map<std::type_index, SingleTonHolder>::iterator itr = s_singleObjects.find(typeIndex);
-    if (itr != s_singleObjects.end())
-        return &itr->second;
-
-    // Create new one if no old value
-    std::pair<std::type_index, SingleTonHolder> singleHolder( 
-        typeIndex,
-        SingleTonHolder()
-    );
-    itr = s_singleObjects.insert(singleHolder).first;
-    SingleTonHolder &singleTonHolder = itr->second;
-    singleTonHolder.object_ = NULL;
-    singleTonHolder.mutex_ = std::shared_ptr<std::mutex>(new std::mutex());
-
-    return &singleTonHolder;
-}
-
-SINGLETON_API void getSharedInstance(const std::type_index &typeIndex,
-                                     void *(*getStaticInstance)(),
-                                     void *&instance) {
-    // Get the single instance
-    SingleTonHolder *singleTonHolder = NULL;
+    if (!overWrite)
     {
-        // Locks and get the global mutex
-        std::lock_guard<std::mutex> myLock(getSingleTonMutex());
-        if (instance != NULL)
-            return;
-        
-        singleTonHolder = getSingleTonType(typeIndex);
+        auto itor = s_pointersDatabase.find(typeIndex);
+        if (itor != s_pointersDatabase.end())
+            return itor->second;
+        return nullptr;
     }
 
-    // Create single instance
+    if (instancePtr == nullptr)
     {
-        // Locks class T and make sure to call construction only once
-        std::lock_guard<std::mutex> myLock(*singleTonHolder->mutex_);
-        if (singleTonHolder->object_ == NULL) {
-            // construct the instance with static funciton
-            singleTonHolder->object_ = (*getStaticInstance)();
+        auto itor = s_pointersDatabase.find(typeIndex);
+        if (itor != s_pointersDatabase.end())
+        {
+            s_pointersDatabase.erase(itor);
         }
-    }    
-
-    // Save single instance object
-    {
-        std::lock_guard<std::mutex> myLock(getSingleTonMutex());
-        instance = singleTonHolder->object_;
+        return nullptr;
     }
+
+    s_pointersDatabase[typeIndex] = instancePtr;
+    return instancePtr;
 }
 

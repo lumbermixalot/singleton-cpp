@@ -3,10 +3,19 @@
 
 MY_DLL_API void setValue() {
 
-    MyObject0 &obj0 = singleton<MyObject0>();
-    obj0.a = 3;
-    obj0.b = 4;
+    IMyObject0* obj0 = Singleton<IMyObject0>::Get();
+    if (!obj0)
+    {
+        printf("WTF0 at %s\n", __FUNCTION__);
+        return;
+    }
+    obj0->SetValues(3, 4);
 
-    MyObject1 &obj1 = singleton<MyObject1>();
-    obj1.c = "test1234";
+    IMyObject1* obj1 = Singleton<IMyObject1>::Get();
+    if (!obj1)
+    {
+        printf("WTF1 at %s\n", __FUNCTION__);
+        return;
+    }
+    obj1->SetString("test1234");
 }
