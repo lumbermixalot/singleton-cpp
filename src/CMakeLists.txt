@@ -15,7 +15,7 @@ target_include_directories(singleton PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../inclu
 # The CXX_EXTENSIONS property is set to OFF to disable compiler specific extensions
 # (for example, on GCC this will make CMake use -std=c++17 rather than -std=gnu++17 in the list of compilation flags).
 set_target_properties(singleton PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
     COMPILE_WARNING_AS_ERROR ON
