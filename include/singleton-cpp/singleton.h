@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cstdlib>
 #include <shared_mutex>
-#include <typeindex>
 #include <memory>
 #include <string>
 #include <sstream>
+
+#include <entt/core/type_info.hpp>
 
 #include "singleton_api.h"
 
@@ -19,7 +19,7 @@
 //                  If false, it will behave as a read operation, regardless of the value of @instancePtr.
 // @param instancePtr The instance pointer.
 // @return A pointer/address to the unique instance.           
-SINGLETON_API void* GetSharedInstance(const std::type_index &typeIndex, bool overWrite, void* instancePtr);
+SINGLETON_API void* GetSharedInstance(entt::id_type typeIndex, bool overWrite, void* instancePtr);
 
 template<typename T>
 class Singleton final{
@@ -82,19 +82,19 @@ std::string Singleton<T>::Register(T* object)
     if (!object)
     {
         std::stringstream ss;
-        ss << "Singleton '" << typeid(T).name() << "' is registering a null pointer!";
+        ss << "Singleton '" << entt::type_name<T>::value() << "' is registering a null pointer!";
         return ss.str();
     }
 
     if (T* foundObject = Get())
     {
         std::stringstream ss;
-        ss << "Singleton '" << typeid(T).name() << "' is already registered! [Found Ptr: 0x" << foundObject << "]!";
+        ss << "Singleton '" << entt::type_name<T>::value() << "' is already registered! [Found Ptr: 0x" << foundObject << "]!";
         return ss.str();
     }
 
     std::unique_lock<std::shared_mutex> lock(s_mutex);
-    GetInstance() = reinterpret_cast<T*>(GetSharedInstance(typeid(T), true, object));
+    GetInstance() = reinterpret_cast<T*>(GetSharedInstance(entt::type_index<T>::value(), true, object));
     s_instanceAssigned = true;
     return "";
 }
@@ -105,21 +105,21 @@ std::string Singleton<T>::Unregister(T* object)
     if (!s_instanceAssigned)
     {
         std::stringstream ss;
-        ss << "Singleton '" << typeid(T).name() << "' is not registered on this module!";
+        ss << "Singleton '" << entt::type_name<T>::value() << "' is not registered on this module!";
         return ss.str();
     }
 
     if (GetInstance() != object)
     {
         std::stringstream ss;
-        ss << "Singleton '" << typeid(T).name() << "' is not the same instance that was registered! "
+        ss << "Singleton '" << entt::type_name<T>::value() << "' is not the same instance that was registered! "
             << "[Expected '" << object << "', Found '" << GetInstance() << "']";
         return ss.str();
     }
 
     // Assign the internal pointer to null.
     std::unique_lock<std::shared_mutex> lock(s_mutex);
-    GetInstance() = reinterpret_cast<T*>(GetSharedInstance(typeid(T), true, nullptr));
+    GetInstance() = reinterpret_cast<T*>(GetSharedInstance(entt::type_index<T>::value(), true, nullptr));
     s_instanceAssigned = false;
     return "";
 }
@@ -140,7 +140,7 @@ T* Singleton<T>::Get()
     // If the instance doesn't exist (which means we could be in a different module),
     // take the full lock and request it.
     std::unique_lock<std::shared_mutex> lock(s_mutex);
-    GetInstance() = reinterpret_cast<T*>(GetSharedInstance(typeid(T), false, nullptr));
+    GetInstance() = reinterpret_cast<T*>(GetSharedInstance(entt::type_index<T>::value(), false, nullptr));
     s_instanceAssigned = static_cast<bool>(GetInstance());
     return GetInstance();
 }

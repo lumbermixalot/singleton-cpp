@@ -1,16 +1,14 @@
-#include <typeinfo>
-#include <typeindex>
 #include <unordered_map>
 #include <mutex>
 
 #include <singleton-cpp/singleton.h>
 
 SINGLETON_API void* GetSharedInstance(
-    const std::type_index& typeIndex,
+    entt::id_type typeIndex,
     bool overWrite, void* instancePtr)
 {
     static std::mutex s_databaseMutex;
-    static std::unordered_map<std::type_index, void*> s_pointersDatabase;
+    static std::unordered_map<entt::id_type, void*> s_pointersDatabase;
 
     std::lock_guard<std::mutex> myLock(s_databaseMutex);
 

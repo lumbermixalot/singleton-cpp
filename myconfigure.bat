@@ -1,2 +1,2 @@
 @echo off
-cmake . -B build -G "Visual Studio 17"
+cmake . -B build -G "Visual Studio 18"
