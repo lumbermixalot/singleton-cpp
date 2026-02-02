@@ -19,4 +19,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}")
 
 
 add_subdirectory(./src)
-add_subdirectory(./example)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  add_subdirectory(./example)
+endif()
+

@@ -27,7 +27,11 @@ set(my_sources
     ./singleton.cpp
 )
 
-add_library(singleton SHARED ${my_sources})
+if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    add_library(singleton STATIC ${my_sources})
+else()
+    add_library(singleton SHARED ${my_sources})
+endif()
 target_include_directories(singleton PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 target_sources(singleton PRIVATE 
